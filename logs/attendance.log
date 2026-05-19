@@ -1,0 +1,106 @@
+2026-05-03 18:31:43,446 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 18:31:43,446 - __main__ - INFO - Initializing database...
+2026-05-03 18:31:43,491 - db - INFO - Database initialized successfully
+2026-05-03 18:31:43,491 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 18:31:43,494 - db - INFO - Loaded 0 students with embeddings
+2026-05-03 18:31:43,495 - __main__ - INFO - Loaded 0 known students
+2026-05-03 18:31:43,495 - recognition - INFO - Updated known students: 0 students, 0 encodings
+2026-05-03 18:31:43,495 - __main__ - INFO - All components initialized successfully
+2026-05-03 18:32:09,473 - __main__ - INFO - Starting registration for student: kofi
+2026-05-03 18:32:09,474 - recognition - INFO - Starting image capture for kofi
+2026-05-03 18:35:47,528 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 18:35:47,528 - __main__ - INFO - Initializing database...
+2026-05-03 18:35:47,530 - db - INFO - Database initialized successfully
+2026-05-03 18:35:47,530 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 18:35:47,531 - db - INFO - Loaded 0 students with embeddings
+2026-05-03 18:35:47,531 - __main__ - INFO - Loaded 0 known students
+2026-05-03 18:35:47,532 - recognition - INFO - Updated known students: 0 students, 0 encodings
+2026-05-03 18:35:47,532 - __main__ - INFO - All components initialized successfully
+2026-05-03 18:35:58,816 - __main__ - INFO - Starting registration for student: Raheem
+2026-05-03 18:35:58,817 - recognition - INFO - Starting image capture for Raheem
+2026-05-03 18:39:56,847 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 18:39:56,847 - __main__ - INFO - Initializing database...
+2026-05-03 18:39:56,849 - db - INFO - Database initialized successfully
+2026-05-03 18:39:56,849 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 18:39:56,850 - db - INFO - Loaded 0 students with embeddings
+2026-05-03 18:39:56,850 - __main__ - INFO - Loaded 0 known students
+2026-05-03 18:39:56,851 - recognition - INFO - Updated known students: 0 students, 0 encodings
+2026-05-03 18:39:56,851 - __main__ - INFO - All components initialized successfully
+2026-05-03 18:40:06,726 - __main__ - INFO - Starting registration for student: Raheem
+2026-05-03 18:40:06,727 - recognition - INFO - Starting image capture for Raheem
+2026-05-03 18:40:13,370 - recognition - WARNING - Please ensure only one face is visible. Detected 0 faces.
+2026-05-03 18:40:14,395 - recognition - WARNING - Please ensure only one face is visible. Detected 0 faces.
+2026-05-03 18:40:15,173 - recognition - WARNING - Please ensure only one face is visible. Detected 0 faces.
+2026-05-03 18:40:15,432 - recognition - WARNING - Please ensure only one face is visible. Detected 0 faces.
+2026-05-03 18:42:32,933 - recognition - INFO - Captured image 1/5 for Raheem
+2026-05-03 18:42:36,271 - recognition - INFO - Captured image 2/5 for Raheem
+2026-05-03 18:42:39,088 - recognition - INFO - Captured image 3/5 for Raheem
+2026-05-03 18:42:40,992 - recognition - WARNING - Please ensure only one face is visible. Detected 0 faces.
+2026-05-03 18:42:43,208 - recognition - INFO - Captured image 4/5 for Raheem
+2026-05-03 18:42:45,248 - recognition - INFO - Captured image 5/5 for Raheem
+2026-05-03 18:42:46,170 - recognition - INFO - Completed image capture for Raheem. Captured 5 images.
+2026-05-03 18:42:46,188 - db - INFO - Added student: Raheem (ID: 1)
+2026-05-03 18:42:46,190 - db - ERROR - Invalid embedding format: must be a list of 128 floats
+2026-05-03 18:42:46,191 - db - ERROR - Invalid embedding format: must be a list of 128 floats
+2026-05-03 18:42:46,191 - db - ERROR - Invalid embedding format: must be a list of 128 floats
+2026-05-03 18:42:46,192 - db - ERROR - Invalid embedding format: must be a list of 128 floats
+2026-05-03 18:42:46,193 - db - ERROR - Invalid embedding format: must be a list of 128 floats
+2026-05-03 18:53:25,119 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 18:53:25,120 - __main__ - INFO - Initializing database...
+2026-05-03 18:53:25,122 - db - INFO - Database initialized successfully
+2026-05-03 18:53:25,122 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:01:15,586 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:01:15,587 - __main__ - INFO - Initializing database...
+2026-05-03 19:01:15,588 - db - INFO - Database initialized successfully
+2026-05-03 19:01:15,588 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:06:03,571 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:06:03,572 - __main__ - INFO - Initializing database...
+2026-05-03 19:06:03,598 - db - INFO - Database initialized successfully
+2026-05-03 19:06:03,598 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:10:10,468 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:10:10,468 - __main__ - INFO - Initializing database...
+2026-05-03 19:10:10,470 - db - INFO - Database initialized successfully
+2026-05-03 19:10:10,470 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:13:41,703 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:13:41,703 - __main__ - INFO - Initializing database...
+2026-05-03 19:13:41,704 - db - INFO - Database initialized successfully
+2026-05-03 19:13:41,705 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:14:34,169 - main - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:14:34,170 - main - INFO - Initializing database...
+2026-05-03 19:14:34,171 - db - INFO - Database initialized successfully
+2026-05-03 19:14:34,171 - main - INFO - Initializing face recognition system...
+2026-05-03 19:23:56,715 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:23:56,715 - __main__ - INFO - Initializing database...
+2026-05-03 19:23:56,716 - db - INFO - Database initialized successfully
+2026-05-03 19:23:56,717 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:23:56,718 - db - INFO - Loaded 1 students with embeddings
+2026-05-03 19:23:56,719 - __main__ - INFO - Loaded 1 known students
+2026-05-03 19:23:56,719 - recognition - INFO - Updated known students: 1 students, 0 encodings
+2026-05-03 19:23:56,719 - __main__ - INFO - All components initialized successfully
+2026-05-03 19:49:46,888 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-03 19:49:46,888 - __main__ - INFO - Initializing database...
+2026-05-03 19:49:46,890 - db - INFO - Database initialized successfully
+2026-05-03 19:49:46,890 - __main__ - INFO - Initializing face recognition system...
+2026-05-03 19:49:46,892 - db - INFO - Loaded 1 students with embeddings
+2026-05-03 19:49:46,893 - __main__ - INFO - Loaded 1 known students
+2026-05-03 19:49:46,893 - recognition - INFO - Updated known students: 1 students, 0 encodings
+2026-05-03 19:49:46,893 - __main__ - INFO - All components initialized successfully
+2026-05-08 14:37:21,729 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-08 14:37:21,733 - __main__ - INFO - Initializing database...
+2026-05-08 14:37:21,765 - db - INFO - Database initialized successfully
+2026-05-08 14:37:21,770 - __main__ - INFO - Initializing face recognition system...
+2026-05-08 14:37:21,773 - db - INFO - Loaded 1 students with embeddings
+2026-05-08 14:37:21,779 - __main__ - INFO - Loaded 1 known students
+2026-05-08 14:37:21,780 - recognition - INFO - Updated known students: 1 students, 0 encodings
+2026-05-08 14:37:21,783 - __main__ - INFO - All components initialized successfully
+2026-05-08 14:38:06,718 - gui - ERROR - Error in attendance loop: 'AttendanceSystem' object has no attribute 'recognition_system'
+2026-05-08 14:41:54,808 - __main__ - INFO - Initializing Face Recognition Attendance System
+2026-05-08 14:41:54,808 - __main__ - INFO - Initializing database...
+2026-05-08 14:41:54,810 - db - INFO - Database initialized successfully
+2026-05-08 14:41:54,811 - __main__ - INFO - Initializing face recognition system...
+2026-05-08 14:41:54,812 - db - INFO - Loaded 1 students with embeddings
+2026-05-08 14:41:54,812 - __main__ - INFO - Loaded 1 known students
+2026-05-08 14:41:54,812 - recognition - INFO - Updated known students: 1 students, 0 encodings
+2026-05-08 14:41:54,813 - __main__ - INFO - All components initialized successfully
+2026-05-08 14:41:59,809 - gui - ERROR - Error in attendance loop: 'FaceRecognitionSystem' object has no attribute 'recognize_and_log'
+2026-05-08 14:43:15,317 - gui - ERROR - Error in attendance loop: 'FaceRecognitionSystem' object has no attribute 'recognize_and_log'
