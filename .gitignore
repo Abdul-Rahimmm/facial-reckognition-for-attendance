@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+python-env/
+venv/
+ENV/
+env/
+.venv/
+.idea/
+.vscode/
+*.env
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Misc
+coverage.xml
+*.cover
+*.coverage
+htmlcov/
