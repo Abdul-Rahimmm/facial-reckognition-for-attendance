@@ -104,3 +104,4 @@
 2026-05-08 14:41:54,813 - __main__ - INFO - All components initialized successfully
 2026-05-08 14:41:59,809 - gui - ERROR - Error in attendance loop: 'FaceRecognitionSystem' object has no attribute 'recognize_and_log'
 2026-05-08 14:43:15,317 - gui - ERROR - Error in attendance loop: 'FaceRecognitionSystem' object has no attribute 'recognize_and_log'
+2026-05-20 02:33:57,426 - __main__ - INFO - Stored selected photos without embeddings because automatic recognition is unavailable

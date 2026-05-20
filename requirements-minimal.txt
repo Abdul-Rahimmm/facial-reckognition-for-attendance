@@ -1,0 +1,6 @@
+# Lightweight mode: database, camera support, reports, and manual attendance.
+# GUI mode also needs Tkinter. Tkinter is not installable from pip; install/use
+# a Python build that includes Tk support, or run `python main.py --mode cli`.
+opencv-python>=4.8,<5
+numpy>=1.24
+Pillow>=10

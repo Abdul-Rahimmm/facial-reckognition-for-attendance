@@ -1,315 +1,147 @@
 # Face Recognition Attendance System
 
-A comprehensive face recognition-based attendance system built with Python, OpenCV, and Tkinter.
+A local-first attendance register built with Python, SQLite, Tkinter, and optional automatic face recognition.
 
-## Features
+The app now has two setup paths:
 
-- **Face Recognition**: Uses the `face_recognition` library for accurate 128-dimensional face embeddings
-- **Database Management**: SQLite database with thread-safe operations and proper schema design
-- **Real-time Processing**: Live video feed processing with bounding boxes and recognition labels
-- **Student Management**: Complete student registration with multiple image capture
-- **Attendance Logging**: Automatic attendance logging with confidence scoring and session tracking
-- **Report Generation**: CSV export functionality with date filtering
-- **Error Handling**: Comprehensive error handling for all common scenarios
-- **Configuration**: Environment variable support and validation
-- **Testing**: Comprehensive test suite covering all components and scenarios
+- **Lightweight mode**: camera preview, student records, manual attendance, logs, and CSV export.
+- **Full mode**: everything in lightweight mode plus automatic face recognition with `face-recognition`.
 
-## System Architecture
+All data stays on the device in SQLite. No network service is required at runtime.
 
-### Core Modules
+## Quick Start
 
-1. **Database Module** (`db.py`)
-   - Thread-safe SQLite operations
-   - Student management (CRUD operations)
-   - Face embedding storage with pickle serialization
-   - Attendance logging with session support
-   - CSV export functionality
-
-2. **Recognition Module** (`recognition.py`)
-   - Face detection using HOG/CNN models
-   - 128-dimensional face embedding extraction
-   - Face matching with configurable tolerance
-   - Real-time recognition pipeline
-   - Webcam image capture
-
-3. **GUI Module** (`gui.py`)
-   - Tkinter-based graphical interface
-   - Real-time video feed display
-   - Student registration workflow
-   - Live attendance taking
-   - Log viewing and export
-
-4. **Configuration Module** (`config.py`)
-   - Centralized configuration management
-   - Environment variable support
-   - Input validation and error handling
-   - ErrorHandler class for user-friendly error messages
-
-5. **Main Application** (`main.py`)
-   - System integration and orchestration
-   - GUI and CLI interfaces
-   - Live video processing loop
-   - Database and recognition system initialization
-
-6. **Testing Framework** (`test_system.py`)
-   - Comprehensive unit tests
-   - Integration tests for end-to-end scenarios
-   - Performance tests for scalability
-   - Error handling validation
-
-## Installation
-
-### Prerequisites
-
-- Python 3.7+
-- OpenCV
-- face_recognition
-- numpy
-- Pillow
-- pandas
-- sqlite3 (built-in)
-
-### Install Dependencies
+The easiest first run is the project bootstrapper:
 
 ```bash
-pip install opencv-python face-recognition numpy Pillow pandas
+python setup_app.py --run
 ```
 
-### Environment Setup
+On macOS/Linux you can also run:
 
-The system automatically creates necessary directories on first run:
-- `data/` - Database and image storage
-- `logs/` - Log files
+```bash
+./run.sh
+```
 
-## Usage
+On Windows:
 
-### GUI Mode (Recommended)
+```bat
+run.bat
+```
+
+The bootstrapper creates or reuses the right virtual environment, installs dependencies, checks the setup, and starts GUI mode when possible. If Tkinter GUI support is missing, it launches CLI mode instead and prints the exact fix.
+
+### Lightweight Setup
+
+Use this on weak devices or machines where `dlib` is hard to install:
+
+```bash
+python -m venv .venv
+.venv/bin/python -m pip install -r requirements-minimal.txt
+.venv/bin/python main.py --check
+.venv/bin/python main.py --mode cli
+```
+
+Lightweight mode supports manual attendance:
+
+```bash
+.venv/bin/python main.py --mode cli
+```
+
+Then use:
+
+- `register` to add a student.
+- `people` to view registered staff/students.
+- `delete` to remove a registration and its attendance records.
+- `manual` to mark attendance by enrollment number.
+- `logs` to view attendance.
+- `export` to export CSV.
+
+The GUI can also register people with an optional staff/student ID, class or department, and training photos. Use **Manage people** to view registered staff/students and delete a registration when needed.
+
+### Full Automatic Face Recognition Setup
+
+Use this with **Python 3.10 or 3.11**. The `face-recognition` package depends on `dlib`, and `dlib` commonly fails to build on Python 3.12+ and Python 3.13 with a long CMake error.
+
+```bash
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements-full.txt
+.venv/bin/python main.py --check
+.venv/bin/python main.py
+```
+
+On Python 3.12+, `requirements-full.txt` intentionally skips `face-recognition` so installation does not fail. The app will still run in lightweight/manual mode. If full setup is painful on a device, stay on `requirements-minimal.txt`; the app remains useful through manual attendance.
+
+## Run Commands
 
 ```bash
 python main.py
-# or explicitly
 python main.py --mode gui
-```
-
-### Command Line Interface
-
-```bash
 python main.py --mode cli
+python main.py --database data/attendance.db
+python main.py --check
+python setup_app.py --check-only
 ```
 
-### Debug Mode
+If `python main.py` says `No module named '_tkinter'`, that Python build does not include Tk GUI support. The app will fall back to CLI mode automatically. To use the GUI, install or select a Python build with Tk support, then recreate the venv. On macOS, the python.org installer usually includes Tk support; Homebrew Python may require separate Tk setup.
+
+For full automatic recognition through the bootstrapper:
 
 ```bash
-python main.py --debug
+python setup_app.py --profile full --run
 ```
 
-### Custom Database Path
+This uses `.venv-full` and looks for Python 3.10/3.11 before installing the full dependency set.
+
+## Useful Environment Options
 
 ```bash
-python main.py --database "custom/path/attendance.db"
+ATTENDANCE_BACKEND=minimal
+ATTENDANCE_LOW_POWER=true
+ATTENDANCE_CAMERA_INDEX=0
+ATTENDANCE_CAMERA_WIDTH=640
+ATTENDANCE_CAMERA_HEIGHT=480
+ATTENDANCE_CAMERA_FPS=15
+ATTENDANCE_FRAME_SCALE=0.5
+ATTENDANCE_RECOGNITION_INTERVAL=5
+ATTENDANCE_DUPLICATE_LOG_WINDOW=300
+ATTENDANCE_TOLERANCE=0.6
+ATTENDANCE_MIN_CONFIDENCE=0.5
+ATTENDANCE_DB_PATH=data/attendance.db
 ```
 
-## Configuration
+Low-power defaults reduce camera FPS, resize frames before recognition, and run recognition every few frames.
 
-### Environment Variables
+## What The App Stores
 
-- `ATTENDANCE_DB_PATH`: Database file path (default: `data/attendance.db`)
-- `ATTENDANCE_TOLERANCE`: Recognition tolerance (default: `0.6`)
-- `ATTENDANCE_MIN_CONFIDENCE`: Minimum confidence threshold (default: `0.5`)
-- `ATTENDANCE_CAMERA_INDEX`: Camera index (default: `0`)
-- `ATTENDANCE_DEFAULT_SESSION`: Default session name (default: `default`)
+- `students`: names, enrollment numbers, optional class/department labels, and selected photo paths.
+- `face_embeddings`: optional face vectors for automatic recognition.
+- `attendance_logs`: timestamped attendance records.
 
-### Configuration Validation
+New embeddings are stored as JSON bytes instead of pickle. Existing legacy pickle embeddings are still readable for backward compatibility.
 
-The system validates all configuration values:
-- Tolerance: 0.3 to 0.8
-- Confidence: 0.0 to 1.0
-- Camera index: 0 to 10
-- Image count: 3 to 20
+## Troubleshooting
 
-## Error Handling
+- Run `python main.py --check` first. It lists missing dependencies, Python compatibility, and camera status.
+- If GUI mode is unavailable with `No module named '_tkinter'`, run `python main.py --mode cli` or use a Python build that includes Tkinter.
+- If you see a `Failed building wheel for dlib` error, you are using a Python version that is too new for the automatic-recognition dependency. Use Python 3.10/3.11 for full mode or reinstall with `requirements-minimal.txt`.
+- If the camera fails, close other camera apps and try `ATTENDANCE_CAMERA_INDEX=1`.
+- If full recognition dependencies fail to install, use `requirements-minimal.txt` and CLI manual attendance.
+- On low-end hardware, keep `ATTENDANCE_LOW_POWER=true`, `ATTENDANCE_FRAME_SCALE=0.5`, and `ATTENDANCE_RECOGNITION_INTERVAL=5`.
 
-The system handles various error scenarios:
+## Development
 
-### Camera Errors
-- No camera connected
-- Camera access denied
-- Frame capture failures
-- Recovery suggestions provided
-
-### Face Detection Errors
-- No faces detected
-- Multiple faces in frame
-- Poor lighting conditions
-- User guidance provided
-
-### Database Errors
-- Duplicate enrollment numbers
-- Database locked
-- Table not found
-- File permission issues
-
-### Recognition Errors
-- Low confidence matches
-- Unknown faces
-- Recognition failures
-- Threshold adjustment suggestions
-
-## Testing
-
-### Run All Tests
+Run the test suite:
 
 ```bash
 python test_system.py
 ```
 
-### Test Coverage
+The current source of truth is the top-level implementation:
 
-- **Unit Tests**: Individual component testing
-- **Integration Tests**: End-to-end workflow testing
-- **Performance Tests**: Large dataset handling
-- **Error Handling Tests**: All error scenarios
-- **Configuration Tests**: Validation and environment variables
-- **Scenario Tests**: Real-world usage patterns
-
-### Test Scenarios
-
-1. **Student Registration**: Register 3-5 students with face training
-2. **Multiple Faces**: Handle multiple faces in a single frame
-3. **Log Management**: View and export attendance logs
-4. **Error Recovery**: Test all error handling paths
-5. **Performance**: Test with 50+ students and 150+ embeddings
-
-## System Requirements
-
-### Minimum Requirements
-- CPU: 2GHz dual-core processor
-- RAM: 4GB
-- Storage: 1GB free space
-- Camera: USB webcam (640x480 resolution)
-
-### Recommended Requirements
-- CPU: 3GHz quad-core processor
-- RAM: 8GB
-- Storage: 10GB free space
-- Camera: HD webcam (1280x720 resolution)
-
-### Operating Systems
-- Windows 10+
-- macOS 10.14+
-- Ubuntu 18.04+
-
-## Performance Characteristics
-
-### Face Recognition
-- Processing speed: ~30 FPS (depends on hardware)
-- Recognition accuracy: 95%+ (with good lighting and images)
-- Memory usage: ~10MB per 100 students
-
-### Database Performance
-- Student lookup: <10ms
-- Embedding retrieval: <50ms
-- Attendance logging: <5ms
-- CSV export: ~1000 records/second
-
-### Scalability
-- Tested with 100+ students
-- 500+ face embeddings
-- 10,000+ attendance records
-- Real-time processing maintained
-
-## Security Considerations
-
-- **Local Storage**: All data stored locally, no network transmission
-- **File Permissions**: Proper file system permissions
-- **Input Validation**: All user inputs validated
-- **Error Masking**: Sensitive information not exposed in error messages
-- **Audit Trail**: All operations logged for accountability
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Camera Not Detected**
-   - Check camera connection
-   - Ensure no other applications are using the camera
-   - Try different camera index: `python main.py --database "path" --camera 1`
-
-2. **Face Recognition Not Working**
-   - Ensure good lighting conditions
-   - Make sure faces are clearly visible
-   - Check camera focus and angle
-   - Adjust recognition tolerance in config
-
-3. **Database Errors**
-   - Check file permissions
-   - Ensure database file is not corrupted
-   - Try running with `--debug` flag for more details
-
-4. **Performance Issues**
-   - Close other applications
-   - Reduce camera resolution in config
-   - Lower recognition tolerance
-   - Ensure adequate system resources
-
-### Log Files
-
-- Main log: `logs/attendance.log`
-- Debug log: `logs/attendance.log` (when `--debug` flag used)
-- Error details: Check log files for specific error messages
-
-## Development
-
-### Code Structure
-
-```
-project_root/
-├── main.py                 # Application entry point
-├── config.py              # Configuration management
-├── db.py                  # Database operations
-├── recognition.py         # Face recognition functions
-├── gui.py                 # GUI interface
-├── test_system.py         # Test suite
-├── requirements.txt       # Python dependencies
-├── data/                  # Data storage
-│   ├── images/           # Training images
-│   └── attendance.db     # SQLite database
-└── logs/                 # Log files
-```
-
-### Adding New Features
-
-1. **Database Changes**: Update `db.py` and run database initialization
-2. **Recognition Features**: Add to `recognition.py` with proper error handling
-3. **GUI Updates**: Modify `gui.py` with thread-safe operations
-4. **Configuration**: Add to `config.py` with validation
-5. **Testing**: Add tests to `test_system.py`
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support and questions:
-- Check the troubleshooting section above
-- Review log files for error details
-- Run tests to validate system functionality
-- Ensure all dependencies are properly installed
-
-## Future Enhancements
-
-- **Multiple Camera Support**: Handle multiple camera inputs
-- **Cloud Integration**: Optional cloud backup and synchronization
-- **Mobile App**: Companion mobile application
-- **Advanced Analytics**: Detailed attendance analytics and reporting
-- **Integration APIs**: REST API for system integration
-- **Machine Learning**: Adaptive recognition with continuous learning
+- `main.py`
+- `gui.py`
+- `db.py`
+- `recognition.py`
+- `config.py`
+- `test_system.py`

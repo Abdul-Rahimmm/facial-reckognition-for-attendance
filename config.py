@@ -1,360 +1,235 @@
 """
-Configuration module for the Face Recognition Attendance System.
-
-This module provides centralized configuration management with
-default values, validation, and environment variable support.
+Configuration and user-facing error helpers for the attendance system.
 """
 
-import os
-from typing import Dict, Any, Optional
+import importlib.util
 import logging
+import os
+import sys
+from typing import Any, Dict, List, Tuple
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
 
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except ValueError:
+        logger.warning("Invalid float for %s; using %s", name, default)
+        return default
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)))
+    except ValueError:
+        logger.warning("Invalid integer for %s; using %s", name, default)
+        return default
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _module_import_status(module_name: str) -> Tuple[bool, str]:
+    if importlib.util.find_spec(module_name) is None:
+        return False, "not installed"
+    try:
+        __import__(module_name)
+        return True, "ok"
+    except Exception as exc:
+        return False, str(exc)
+
+
 class Config:
-    """Configuration class with validation and defaults."""
-    
-    # Database configuration
-    DATABASE_PATH = os.getenv('ATTENDANCE_DB_PATH', 'data/attendance.db')
-    DATABASE_TIMEOUT = float(os.getenv('ATTENDANCE_DB_TIMEOUT', '30.0'))
-    
-    # Face recognition configuration
-    RECOGNITION_TOLERANCE = float(os.getenv('ATTENDANCE_TOLERANCE', '0.6'))
-    RECOGNITION_MIN_CONFIDENCE = float(os.getenv('ATTENDANCE_MIN_CONFIDENCE', '0.5'))
-    RECOGNITION_MODEL = os.getenv('ATTENDANCE_MODEL', 'hog')  # 'hog' or 'cnn'
-    RECOGNITION_UPSAMPLES = int(os.getenv('ATTENDANCE_UPSAMPLES', '1'))
-    
-    # Camera configuration
-    CAMERA_INDEX = int(os.getenv('ATTENDANCE_CAMERA_INDEX', '0'))
-    CAMERA_WIDTH = int(os.getenv('ATTENDANCE_CAMERA_WIDTH', '640'))
-    CAMERA_HEIGHT = int(os.getenv('ATTENDANCE_CAMERA_HEIGHT', '480'))
-    CAMERA_FPS = int(os.getenv('ATTENDANCE_CAMERA_FPS', '30'))
-    
-    # GUI configuration
-    GUI_WIDTH = int(os.getenv('ATTENDANCE_GUI_WIDTH', '1000'))
-    GUI_HEIGHT = int(os.getenv('ATTENDANCE_GUI_HEIGHT', '700'))
-    GUI_THEME_COLOR = os.getenv('ATTENDANCE_THEME_COLOR', '#f0f0f0')
-    
-    # Session configuration
-    DEFAULT_SESSION = os.getenv('ATTENDANCE_DEFAULT_SESSION', 'default')
-    SESSION_TIMEOUT = int(os.getenv('ATTENDANCE_SESSION_TIMEOUT', '300'))  # 5 minutes
-    
-    # File paths
-    DATA_DIR = os.getenv('ATTENDANCE_DATA_DIR', 'data')
-    IMAGES_DIR = os.getenv('ATTENDANCE_IMAGES_DIR', os.path.join(DATA_DIR, 'images'))
-    LOGS_DIR = os.getenv('ATTENDANCE_LOGS_DIR', 'logs')
-    LOG_FILE = os.getenv('ATTENDANCE_LOG_FILE', os.path.join(LOGS_DIR, 'attendance.log'))
-    
-    # Recognition thresholds
-    MIN_FACE_SIZE = int(os.getenv('ATTENDANCE_MIN_FACE_SIZE', '100'))
-    MAX_FACES_PER_FRAME = int(os.getenv('ATTENDANCE_MAX_FACES', '10'))
-    
-    # Validation ranges
+    """Central app configuration sourced from environment variables."""
+
+    DATA_DIR = os.getenv("ATTENDANCE_DATA_DIR", "data")
+    IMAGES_DIR = os.getenv("ATTENDANCE_IMAGES_DIR", os.path.join(DATA_DIR, "images"))
+    LOGS_DIR = os.getenv("ATTENDANCE_LOGS_DIR", "logs")
+    DATABASE_PATH = os.getenv("ATTENDANCE_DB_PATH", os.path.join(DATA_DIR, "attendance.db"))
+    DATABASE_TIMEOUT = _env_float("ATTENDANCE_DB_TIMEOUT", 30.0)
+    LOG_FILE = os.getenv("ATTENDANCE_LOG_FILE", os.path.join(LOGS_DIR, "attendance.log"))
+
+    BACKEND_MODE = os.getenv("ATTENDANCE_BACKEND", "auto").strip().lower()
+    LOW_POWER_MODE = _env_bool("ATTENDANCE_LOW_POWER", True)
+    RECOGNITION_TOLERANCE = _env_float("ATTENDANCE_TOLERANCE", 0.6)
+    RECOGNITION_MIN_CONFIDENCE = _env_float("ATTENDANCE_MIN_CONFIDENCE", 0.5)
+    RECOGNITION_MODEL = os.getenv("ATTENDANCE_MODEL", "hog").strip().lower()
+    RECOGNITION_UPSAMPLES = _env_int("ATTENDANCE_UPSAMPLES", 0 if LOW_POWER_MODE else 1)
+    RECOGNITION_INTERVAL = max(1, _env_int("ATTENDANCE_RECOGNITION_INTERVAL", 5 if LOW_POWER_MODE else 2))
+    FRAME_SCALE = min(1.0, max(0.2, _env_float("ATTENDANCE_FRAME_SCALE", 0.5 if LOW_POWER_MODE else 1.0)))
+    DUPLICATE_LOG_WINDOW_SECONDS = max(0, _env_int("ATTENDANCE_DUPLICATE_LOG_WINDOW", 300))
+
+    CAMERA_INDEX = _env_int("ATTENDANCE_CAMERA_INDEX", 0)
+    CAMERA_WIDTH = _env_int("ATTENDANCE_CAMERA_WIDTH", 640)
+    CAMERA_HEIGHT = _env_int("ATTENDANCE_CAMERA_HEIGHT", 480)
+    CAMERA_FPS = _env_int("ATTENDANCE_CAMERA_FPS", 15 if LOW_POWER_MODE else 30)
+
+    GUI_WIDTH = _env_int("ATTENDANCE_GUI_WIDTH", 1000)
+    GUI_HEIGHT = _env_int("ATTENDANCE_GUI_HEIGHT", 700)
+    GUI_THEME_COLOR = os.getenv("ATTENDANCE_THEME_COLOR", "#f0f0f0")
+
+    DEFAULT_SESSION = os.getenv("ATTENDANCE_DEFAULT_SESSION", "default")
+    MIN_FACE_SIZE = _env_int("ATTENDANCE_MIN_FACE_SIZE", 60 if LOW_POWER_MODE else 100)
+    MAX_FACES_PER_FRAME = _env_int("ATTENDANCE_MAX_FACES", 10)
+
     TOLERANCE_RANGE = (0.3, 0.8)
     CONFIDENCE_RANGE = (0.0, 1.0)
     CAMERA_INDEX_RANGE = (0, 10)
-    IMAGE_COUNT_RANGE = (3, 20)
-    
+    IMAGE_COUNT_RANGE = (1, 20)
+    VALID_BACKENDS = {"auto", "minimal", "full"}
+    FACE_RECOGNITION_MAX_PYTHON = (3, 11)
+
+    @classmethod
+    def ensure_directories(cls) -> None:
+        for directory in (cls.DATA_DIR, cls.IMAGES_DIR, cls.LOGS_DIR):
+            if directory:
+                os.makedirs(directory, exist_ok=True)
+
     @classmethod
     def validate_tolerance(cls, tolerance: float) -> bool:
-        """Validate recognition tolerance is within acceptable range."""
         return cls.TOLERANCE_RANGE[0] <= tolerance <= cls.TOLERANCE_RANGE[1]
-    
+
     @classmethod
     def validate_confidence(cls, confidence: float) -> bool:
-        """Validate minimum confidence is within acceptable range."""
         return cls.CONFIDENCE_RANGE[0] <= confidence <= cls.CONFIDENCE_RANGE[1]
-    
+
     @classmethod
     def validate_camera_index(cls, index: int) -> bool:
-        """Validate camera index is within acceptable range."""
         return cls.CAMERA_INDEX_RANGE[0] <= index <= cls.CAMERA_INDEX_RANGE[1]
-    
+
     @classmethod
     def validate_image_count(cls, count: int) -> bool:
-        """Validate image count is within acceptable range."""
         return cls.IMAGE_COUNT_RANGE[0] <= count <= cls.IMAGE_COUNT_RANGE[1]
-    
+
+    @classmethod
+    def validate_backend_mode(cls, backend: str) -> bool:
+        return backend in cls.VALID_BACKENDS
+
     @classmethod
     def get_config_dict(cls) -> Dict[str, Any]:
-        """Get all configuration values as a dictionary."""
         return {
-            'database_path': cls.DATABASE_PATH,
-            'database_timeout': cls.DATABASE_TIMEOUT,
-            'recognition_tolerance': cls.RECOGNITION_TOLERANCE,
-            'recognition_min_confidence': cls.RECOGNITION_MIN_CONFIDENCE,
-            'recognition_model': cls.RECOGNITION_MODEL,
-            'recognition_upsamples': cls.RECOGNITION_UPSAMPLES,
-            'camera_index': cls.CAMERA_INDEX,
-            'camera_width': cls.CAMERA_WIDTH,
-            'camera_height': cls.CAMERA_HEIGHT,
-            'camera_fps': cls.CAMERA_FPS,
-            'gui_width': cls.GUI_WIDTH,
-            'gui_height': cls.GUI_HEIGHT,
-            'gui_theme_color': cls.GUI_THEME_COLOR,
-            'default_session': cls.DEFAULT_SESSION,
-            'session_timeout': cls.SESSION_TIMEOUT,
-            'data_dir': cls.DATA_DIR,
-            'images_dir': cls.IMAGES_DIR,
-            'logs_dir': cls.LOGS_DIR,
-            'log_file': cls.LOG_FILE,
-            'min_face_size': cls.MIN_FACE_SIZE,
-            'max_faces_per_frame': cls.MAX_FACES_PER_FRAME,
+            "database_path": cls.DATABASE_PATH,
+            "backend_mode": cls.BACKEND_MODE,
+            "low_power_mode": cls.LOW_POWER_MODE,
+            "recognition_tolerance": cls.RECOGNITION_TOLERANCE,
+            "recognition_min_confidence": cls.RECOGNITION_MIN_CONFIDENCE,
+            "recognition_interval": cls.RECOGNITION_INTERVAL,
+            "frame_scale": cls.FRAME_SCALE,
+            "duplicate_log_window_seconds": cls.DUPLICATE_LOG_WINDOW_SECONDS,
+            "camera_index": cls.CAMERA_INDEX,
+            "camera_width": cls.CAMERA_WIDTH,
+            "camera_height": cls.CAMERA_HEIGHT,
+            "camera_fps": cls.CAMERA_FPS,
+            "default_session": cls.DEFAULT_SESSION,
         }
-    
+
     @classmethod
-    def update_tolerance(cls, new_tolerance: float) -> bool:
-        """Update the recognition tolerance with validation."""
-        if not cls.validate_tolerance(new_tolerance):
-            logger.warning(f"Invalid tolerance value: {new_tolerance}. Must be between {cls.TOLERANCE_RANGE[0]} and {cls.TOLERANCE_RANGE[1]}")
-            return False
-        
-        cls.RECOGNITION_TOLERANCE = new_tolerance
-        logger.info(f"Recognition tolerance updated to: {new_tolerance}")
-        return True
-    
-    @classmethod
-    def update_min_confidence(cls, new_confidence: float) -> bool:
-        """Update the minimum confidence with validation."""
-        if not cls.validate_confidence(new_confidence):
-            logger.warning(f"Invalid confidence value: {new_confidence}. Must be between {cls.CONFIDENCE_RANGE[0]} and {cls.CONFIDENCE_RANGE[1]}")
-            return False
-        
-        cls.RECOGNITION_MIN_CONFIDENCE = new_confidence
-        logger.info(f"Minimum confidence updated to: {new_confidence}")
-        return True
-    
-    @classmethod
-    def update_camera_index(cls, new_index: int) -> bool:
-        """Update the camera index with validation."""
-        if not cls.validate_camera_index(new_index):
-            logger.warning(f"Invalid camera index: {new_index}. Must be between {cls.CAMERA_INDEX_RANGE[0]} and {cls.CAMERA_INDEX_RANGE[1]}")
-            return False
-        
-        cls.CAMERA_INDEX = new_index
-        logger.info(f"Camera index updated to: {new_index}")
-        return True
-    
-    @classmethod
-    def ensure_directories(cls):
-        """Ensure all required directories exist."""
-        directories = [
-            cls.DATA_DIR,
-            cls.IMAGES_DIR,
-            cls.LOGS_DIR
-        ]
-        
-        for directory in directories:
-            if directory:  # Skip empty directory names
-                os.makedirs(directory, exist_ok=True)
-                logger.debug(f"Ensured directory exists: {directory}")
+    def dependency_report(cls, check_camera: bool = False) -> Dict[str, Any]:
+        python_version = sys.version_info[:3]
+        face_install_supported = python_version[:2] <= cls.FACE_RECOGNITION_MAX_PYTHON
+        tkinter_ok, tkinter_detail = _module_import_status("tkinter")
+        cv2_ok, cv2_detail = _module_import_status("cv2")
+        numpy_ok, numpy_detail = _module_import_status("numpy")
+        pil_ok, pil_detail = _module_import_status("PIL")
+        face_ok, face_detail = _module_import_status("face_recognition")
+        gui_ready = tkinter_ok and cv2_ok and numpy_ok and pil_ok
+        cli_ready = cv2_ok and numpy_ok and pil_ok
+        required_gui = {
+            "tkinter": tkinter_ok,
+            "cv2": cv2_ok,
+            "numpy": numpy_ok,
+            "PIL": pil_ok,
+        }
+        dependency_details = {
+            "tkinter": tkinter_detail,
+            "cv2": cv2_detail,
+            "numpy": numpy_detail,
+            "PIL": pil_detail,
+            "face_recognition": face_detail,
+        }
+        full_ready = gui_ready and face_ok
+
+        camera_available = None
+        if check_camera and cv2_ok:
+            try:
+                import cv2  # type: ignore
+
+                camera = cv2.VideoCapture(cls.CAMERA_INDEX)
+                camera_available = camera.isOpened()
+                camera.release()
+            except Exception:
+                camera_available = False
+
+        missing_minimal = [name for name, ok in {"cv2": cv2_ok, "numpy": numpy_ok, "PIL": pil_ok}.items() if not ok]
+        missing_gui = [name for name, ok in required_gui.items() if not ok]
+        missing_full = list(missing_minimal)
+        if not tkinter_ok:
+            missing_full.append("tkinter")
+        if not face_ok:
+            missing_full.append("face_recognition")
+
+        return {
+            "backend_mode": cls.BACKEND_MODE,
+            "python_version": ".".join(str(part) for part in python_version),
+            "face_install_supported": face_install_supported,
+            "minimal_ready": cli_ready,
+            "cli_ready": cli_ready,
+            "gui_ready": gui_ready,
+            "full_ready": full_ready,
+            "face_backend_available": face_ok,
+            "required": required_gui,
+            "dependency_details": dependency_details,
+            "missing_minimal": missing_minimal,
+            "missing_gui": missing_gui,
+            "missing_full": missing_full,
+            "camera_available": camera_available,
+        }
 
 
 class ErrorHandler:
-    """Centralized error handling with detailed messages and recovery suggestions."""
-    
+    """Build concise, recoverable error messages for UI and CLI flows."""
+
     @staticmethod
     def handle_camera_error(error: Exception, context: str = "") -> Dict[str, Any]:
-        """Handle camera-related errors."""
-        error_msg = str(error)
-        logger.error(f"Camera error in {context}: {error_msg}")
-        
-        suggestions = []
-        
-        if "Cannot access camera" in error_msg or "No cameras found" in error_msg:
-            suggestions = [
-                "Check if camera is properly connected",
-                "Ensure no other applications are using the camera",
-                "Try different camera index (0, 1, 2, etc.)",
-                "Check camera permissions in your operating system"
-            ]
-            error_type = "NO_CAMERA"
-        
-        elif "Failed to capture frame" in error_msg:
-            suggestions = [
-                "Camera connection may have been lost",
-                "Try restarting the camera or application",
-                "Check camera drivers and firmware"
-            ]
-            error_type = "CAPTURE_FAILED"
-        
-        else:
-            suggestions = [
-                "Check camera connection and permissions",
-                "Try restarting the application",
-                "Contact support if problem persists"
-            ]
-            error_type = "CAMERA_UNKNOWN"
-        
         return {
-            'error_type': error_type,
-            'error_message': error_msg,
-            'suggestions': suggestions,
-            'context': context,
-            'recovery_possible': True
+            "error_type": "CAMERA_UNAVAILABLE",
+            "error_message": str(error),
+            "suggestions": [
+                "Check camera permissions.",
+                "Close other apps using the camera.",
+                "Try ATTENDANCE_CAMERA_INDEX=1 if another camera is connected.",
+            ],
+            "context": context,
+            "recovery_possible": True,
         }
-    
+
     @staticmethod
-    def handle_face_detection_error(error: Exception, context: str = "") -> Dict[str, Any]:
-        """Handle face detection errors."""
-        error_msg = str(error)
-        logger.error(f"Face detection error in {context}: {error_msg}")
-        
+    def handle_dependency_error(missing: List[str], full_mode: bool = False) -> Dict[str, Any]:
+        install_file = "requirements-full.txt" if full_mode else "requirements-minimal.txt"
         suggestions = [
-            "Ensure proper lighting conditions",
-            "Make sure faces are clearly visible",
-            "Check that people are within camera range",
-            "Try adjusting camera angle or distance"
+            f"Install with: python -m pip install -r {install_file}",
+            "Use ATTENDANCE_BACKEND=minimal on weak devices.",
+            "Run python main.py --check after installing dependencies.",
         ]
-        
+        if full_mode and not Config.dependency_report()["face_install_supported"]:
+            suggestions.insert(1, "Automatic face recognition needs Python 3.10 or 3.11; Python 3.12+ uses lightweight mode safely.")
         return {
-            'error_type': 'FACE_DETECTION_FAILED',
-            'error_message': error_msg,
-            'suggestions': suggestions,
-            'context': context,
-            'recovery_possible': True
+            "error_type": "MISSING_DEPENDENCIES",
+            "error_message": "Missing dependencies: " + ", ".join(missing),
+            "suggestions": suggestions,
+            "context": "startup",
+            "recovery_possible": True,
         }
-    
+
     @staticmethod
-    def handle_database_error(error: Exception, context: str = "") -> Dict[str, Any]:
-        """Handle database-related errors."""
-        error_msg = str(error)
-        logger.error(f"Database error in {context}: {error_msg}")
-        
-        suggestions = []
-        
-        if "UNIQUE constraint failed" in error_msg:
-            suggestions = [
-                "Student with this enrollment number already exists",
-                "Use a different enrollment number",
-                "Check for duplicate entries"
-            ]
-            error_type = "DUPLICATE_ENTRY"
-        
-        elif "database is locked" in error_msg:
-            suggestions = [
-                "Database may be in use by another process",
-                "Wait a moment and try again",
-                "Check for proper file permissions"
-            ]
-            error_type = "DATABASE_LOCKED"
-        
-        elif "No such table" in error_msg:
-            suggestions = [
-                "Database tables may not be initialized",
-                "Run database initialization",
-                "Check database file integrity"
-            ]
-            error_type = "TABLE_NOT_FOUND"
-        
-        else:
-            suggestions = [
-                "Check database file permissions",
-                "Ensure database file is not corrupted",
-                "Try restarting the application"
-            ]
-            error_type = "DATABASE_UNKNOWN"
-        
-        return {
-            'error_type': error_type,
-            'error_message': error_msg,
-            'suggestions': suggestions,
-            'context': context,
-            'recovery_possible': True
-        }
-    
-    @staticmethod
-    def handle_recognition_error(error: Exception, context: str = "") -> Dict[str, Any]:
-        """Handle face recognition errors."""
-        error_msg = str(error)
-        logger.error(f"Recognition error in {context}: {error_msg}")
-        
-        suggestions = [
-            "Ensure faces are clearly visible",
-            "Check lighting conditions",
-            "Make sure person is registered in the system",
-            "Try adjusting recognition tolerance settings"
-        ]
-        
-        return {
-            'error_type': 'RECOGNITION_FAILED',
-            'error_message': error_msg,
-            'suggestions': suggestions,
-            'context': context,
-            'recovery_possible': True
-        }
-    
-    @staticmethod
-    def handle_low_confidence(confidence: float, threshold: float, context: str = "") -> Dict[str, Any]:
-        """Handle low confidence recognition results."""
-        logger.warning(f"Low confidence recognition in {context}: {confidence:.3f} (threshold: {threshold:.3f})")
-        
-        suggestions = [
-            "Ensure good lighting conditions",
-            "Make sure face is clearly visible",
-            "Check camera focus and angle",
-            "Consider lowering recognition threshold",
-            "Retrain with more images if needed"
-        ]
-        
-        return {
-            'error_type': 'LOW_CONFIDENCE',
-            'confidence': confidence,
-            'threshold': threshold,
-            'suggestions': suggestions,
-            'context': context,
-            'recovery_possible': True
-        }
-    
-    @staticmethod
-    def handle_duplicate_name(name: str, context: str = "") -> Dict[str, Any]:
-        """Handle duplicate name scenarios."""
-        logger.warning(f"Duplicate name detected in {context}: {name}")
-        
-        suggestions = [
-            "Use full names to avoid conflicts",
-            "Add middle names or initials",
-            "Use enrollment numbers for disambiguation",
-            "Consider using unique identifiers"
-        ]
-        
-        return {
-            'error_type': 'DUPLICATE_NAME',
-            'name': name,
-            'suggestions': suggestions,
-            'context': context,
-            'recovery_possible': True
-        }
-    
-    @staticmethod
-    def show_user_error(error_info: Dict[str, Any], parent=None):
-        """Display user-friendly error message."""
-        import tkinter as tk
-        from tkinter import messagebox
-        
-        error_type = error_info.get('error_type', 'UNKNOWN')
-        error_message = error_info.get('error_message', 'An unknown error occurred')
-        suggestions = error_info.get('suggestions', [])
-        
-        # Create user-friendly message
-        message = f"Error Type: {error_type}\n\n"
-        message += f"Details: {error_message}\n\n"
-        message += "Suggestions:\n"
-        for i, suggestion in enumerate(suggestions, 1):
-            message += f"{i}. {suggestion}\n"
-        
-        message += "\nDo you want to continue or exit the application?"
-        
-        # Show error dialog
-        if parent:
-            result = messagebox.showerror("System Error", message, parent=parent)
-        else:
-            result = messagebox.showerror("System Error", message)
-        
-        return result
+    def format_error(error_info: Dict[str, Any]) -> str:
+        suggestions = "\n".join(f"- {item}" for item in error_info.get("suggestions", []))
+        return f"{error_info.get('error_type', 'ERROR')}: {error_info.get('error_message', '')}\n{suggestions}"
 
 
-# Initialize directories on import
 Config.ensure_directories()

@@ -1,0 +1,10 @@
+# Full automatic face recognition mode where supported.
+#
+# The face-recognition package depends on dlib. On Python 3.12+,
+# pip commonly tries to compile dlib from source and fails with a long
+# CMake build error. This marker prevents that failure for new users.
+#
+# For automatic recognition, use Python 3.10 or 3.11 and then install
+# this file. On Python 3.12+, this installs the lightweight app safely.
+-r requirements-minimal.txt
+face-recognition>=1.3; python_version < "3.12"
