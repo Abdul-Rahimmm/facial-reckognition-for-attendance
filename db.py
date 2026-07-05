@@ -278,19 +278,29 @@ class DatabaseManager:
 
     def recently_logged(self, student_id: int, session: str, window_seconds: Optional[int] = None) -> bool:
         window_seconds = Config.DUPLICATE_LOG_WINDOW_SECONDS if window_seconds is None else window_seconds
-        if window_seconds <= 0:
-            return False
-        cutoff = (datetime.now() - timedelta(seconds=window_seconds)).strftime("%Y-%m-%d %H:%M:%S")
         with self.lock:
             with self._connect() as conn:
                 cursor = conn.cursor()
+                if window_seconds is not None and window_seconds > 0:
+                    cutoff = (datetime.now() - timedelta(seconds=window_seconds)).strftime("%Y-%m-%d %H:%M:%S")
+                    cursor.execute(
+                        """
+                        SELECT 1 FROM attendance_logs
+                        WHERE student_id = ? AND session = ? AND timestamp >= ?
+                        LIMIT 1
+                        """,
+                        (student_id, session, cutoff),
+                    )
+                    if cursor.fetchone() is not None:
+                        return True
+
                 cursor.execute(
                     """
                     SELECT 1 FROM attendance_logs
-                    WHERE student_id = ? AND session = ? AND timestamp >= ?
+                    WHERE student_id = ? AND session = ?
                     LIMIT 1
                     """,
-                    (student_id, session, cutoff),
+                    (student_id, session),
                 )
                 return cursor.fetchone() is not None
 

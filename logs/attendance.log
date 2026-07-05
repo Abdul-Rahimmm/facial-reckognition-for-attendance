@@ -105,3 +105,13 @@
 2026-05-08 14:41:59,809 - gui - ERROR - Error in attendance loop: 'FaceRecognitionSystem' object has no attribute 'recognize_and_log'
 2026-05-08 14:43:15,317 - gui - ERROR - Error in attendance loop: 'FaceRecognitionSystem' object has no attribute 'recognize_and_log'
 2026-05-20 02:33:57,426 - __main__ - INFO - Stored selected photos without embeddings because automatic recognition is unavailable
+2026-07-05 15:37:25,153 - __main__ - INFO - Stored selected photos without embeddings because automatic recognition is unavailable
+2026-07-05 15:37:25,161 - __main__ - ERROR - Registration failed: Student with enrollment number CSC/0069/22 already exists
+2026-07-05 15:38:44,161 - __main__ - INFO - Stored selected photos without embeddings because automatic recognition is unavailable
+2026-07-05 17:11:21,714 - __main__ - ERROR - Registration failed: Student with enrollment number CSC/0069/22 already exists
+2026-07-05 18:19:45,774 - main - WARNING - Could not read image: sample.jpg
+2026-07-05 18:21:52,149 - recognition - ERROR - Error detecting faces: OpenCV(4.13.0) D:\a\opencv-python\opencv-python\opencv\modules\imgproc\src\resize.cpp:4208: error: (-215:Assertion failed) !ssize.empty() in function 'cv::resize'
+
+2026-07-05 21:44:08,077 - main - WARNING - Could not read image: sample.jpg
+2026-07-05 21:44:40,254 - recognition - ERROR - Error detecting faces: OpenCV(4.13.0) D:\a\opencv-python\opencv-python\opencv\modules\imgproc\src\resize.cpp:4208: error: (-215:Assertion failed) !ssize.empty() in function 'cv::resize'
+

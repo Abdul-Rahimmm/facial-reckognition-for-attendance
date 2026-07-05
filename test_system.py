@@ -87,6 +87,20 @@ class TestDatabaseManager(TempDatabaseTest):
         self.assertFalse(second)
         self.assertEqual(len(self.db.get_attendance_logs()), 1)
 
+    def test_duplicate_attendance_suppression_is_session_based(self):
+        student_id = self.db.add_student("Test Student", "TEST003")
+        with self.db._connect() as conn:
+            conn.execute(
+                "INSERT INTO attendance_logs (student_id, session, confidence, timestamp) VALUES (?, ?, ?, ?)",
+                (student_id, "morning", 0.9, "2000-01-01 00:00:00"),
+            )
+            conn.commit()
+
+        suppressed = self.db.log_attendance(student_id, "morning", 0.9, duplicate_window_seconds=1)
+
+        self.assertFalse(suppressed)
+        self.assertEqual(len(self.db.get_attendance_logs()), 1)
+
     def test_csv_export_even_when_empty(self):
         fd, csv_path = tempfile.mkstemp(suffix=".csv")
         os.close(fd)
